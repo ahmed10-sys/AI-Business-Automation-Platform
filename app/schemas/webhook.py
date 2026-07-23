@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict, Any
 
 class WhatsAppMetadata(BaseModel):
@@ -15,26 +15,46 @@ class Contact(BaseModel):
 class TextMessageContent(BaseModel):
     body: str
 
+class WhatsAppMedia(BaseModel):
+    id: str
+    mime_type: str
+    sha256: str
+
+class WhatsAppImage(WhatsAppMedia):
+    caption: Optional[str] = None
+
+class WhatsAppDocument(WhatsAppMedia):
+    caption: Optional[str] = None
+    filename: Optional[str] = None
+
+class WhatsAppAudio(WhatsAppMedia):
+    pass
+
+class WhatsAppVideo(WhatsAppMedia):
+    caption: Optional[str] = None
+
+class WhatsAppVoice(WhatsAppMedia):
+    pass
+
 class Message(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     from_: str = Field(alias="from")
     id: str
     timestamp: str
     type: str
     text: Optional[TextMessageContent] = None
-    image: Optional[Dict[str, Any]] = None
-    document: Optional[Dict[str, Any]] = None
-    audio: Optional[Dict[str, Any]] = None
-    video: Optional[Dict[str, Any]] = None
-    voice: Optional[Dict[str, Any]] = None
+    image: Optional[WhatsAppImage] = None
+    document: Optional[WhatsAppDocument] = None
+    audio: Optional[WhatsAppAudio] = None
+    video: Optional[WhatsAppVideo] = None
+    voice: Optional[WhatsAppVoice] = None
     location: Optional[Dict[str, Any]] = None
     contacts: Optional[List[Dict[str, Any]]] = None
     interactive: Optional[Dict[str, Any]] = None
     button: Optional[Dict[str, Any]] = None
     context: Optional[Dict[str, Any]] = None
     errors: Optional[List[Dict[str, Any]]] = None
-
-    class Config:
-        populate_by_name = True
 
 class Conversation(BaseModel):
     id: str
